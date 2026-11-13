@@ -9,18 +9,30 @@ import UserProfilePage from '../pages/UserProfilePage'
 import LoginPage from '../pages/LoginPage'
 import RegisterPage from '../pages/RegisterPage'
 import NotFoundPage from '../pages/NotFoundPage'
+import AuthRequired from './AuthRequired'
+import AuthRestrict from './AuthRestrict'
 
 function Router() {
 	return (
 		<Routes>
-			<Route path="/" element={<MainLayout/>}>
+			<Route path="/" element={
+				<AuthRequired>
+					<MainLayout/>
+				</AuthRequired>
+			}>
 				<Route index element={<HomePage/>} />
 				<Route path='account' element={<AccountPage/>} />
 				<Route path="user/:userId" element={<UserProfilePage/>} />
 			</Route>
-			<Route element={<BlankLayout/>}>
+			<Route element={
+				<AuthRestrict>
+					<BlankLayout/>
+				</AuthRestrict>
+			}>
 				<Route path="/login" element={<LoginPage/>} />
 				<Route path="/register" element={<RegisterPage/>} />
+			</Route>
+			<Route element={<BlankLayout/>}>
 				<Route path="*" element={<NotFoundPage/>} />
 			</Route>
 		</Routes>

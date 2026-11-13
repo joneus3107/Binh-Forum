@@ -8,7 +8,7 @@ function BlankLayout() {
 			minHeight: '100vh',
 			justifyContent: 'center',
 			alignItems: 'center'
-		}}>
+		}} spacing={4}>
 			<Logo sx={{width: '120px'}} />
 			<Outlet/>
 		</Stack>

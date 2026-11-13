@@ -19,11 +19,12 @@ apiService.interceptors.request.use(
 apiService.interceptors.response.use(
 	(response) => {
 		console.log("Start Response", response);
-		return response.data
+		return response
 	},
 	function (error) {
 		console.log("Response Error", {error});
-		return Promise.reject(error)
+		const message = error?.response?.data || 'Lỗi chưa xác định'
+		return Promise.reject({message})
 	}
 )
 
