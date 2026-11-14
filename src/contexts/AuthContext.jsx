@@ -1,14 +1,13 @@
 import { createContext, useReducer, useEffect } from 'react'
 import apiService from '../app/apiService'
 import { isValidToken } from '../utils/jwt'
+import { LOGIN_SUCCESS, LOGOUT, REGISTER_SUCCESS } from '../constants/auth'
 
 const initialState = {
 	isInitialized: false,
 	isAuthenticated: false,
 	user: null,
 }
-
-const LOGIN_SUCCESS = "AUTH.LOGIN_SUCCESS"
 
 const reducer = (state, action) => {
 	switch (action.type) {
@@ -17,6 +16,18 @@ const reducer = (state, action) => {
 				...state,
 				isAuthenticated: true,
 				user: action.payload.user
+			}
+		case REGISTER_SUCCESS:
+			return {
+				...state,
+				isAuthenticated: true,
+				user: action.payload.user
+			}
+		case LOGOUT:
+			return {
+				...state,
+				isAuthenticated: false,
+				user: null
 			}
 		default:
 			return state
@@ -41,10 +52,6 @@ function AuthProvider({children}) {
 	const [state, dispatch] = useReducer(reducer, initialState)
 
 	const login = async ({email, password}, callback) => {
-		// const response = await apiService.post("/auth/login", {
-		// 	email,
-		// 	password
-		// })
 		const response = await apiService.post("/login", {
 			email,
 			password
@@ -60,8 +67,21 @@ function AuthProvider({children}) {
 		callback()
 	}
 
+	const register = async (register_data, callback) => {
+		const response = await apiService.post("/register", register_data)
+		const {user, accessToken} = response.data
+
+		setSession(accessToken)
+		dispatch({
+			type: REGISTER_SUCCESS,
+			payload: {user}
+		})
+
+		callback()
+	}
+
 	return (
-		<AuthContext.Provider value={{...state, login}}>
+		<AuthContext.Provider value={{...state, login, register}}>
 			{children}
 		</AuthContext.Provider>
 	)

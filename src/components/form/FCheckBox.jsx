@@ -1,4 +1,4 @@
-import { FormControlLabel, Checkbox, FormControl } from "@mui/material"
+import { FormControlLabel, Checkbox, FormControl, FormHelperText } from "@mui/material"
 import { useFormContext, Controller } from "react-hook-form"
 
 function FCheckBox({name, label, ...other}) {
@@ -16,6 +16,7 @@ function FCheckBox({name, label, ...other}) {
 							<Checkbox {...field} {...other} checked={!!value} />
 						}
 					/>
+					{!!error && <FormHelperText>{error.message}</FormHelperText>}
 				</FormControl>
 			)}
 		/>

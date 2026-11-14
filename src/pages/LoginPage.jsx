@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { FormProvider, FTextField, FPassword, FCheckBox } from '../components/form'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from "@hookform/resolvers/yup"
@@ -27,7 +26,6 @@ function LoginPage() {
 		resolver: yupResolver(LoginSchema),
 		defaultValues
 	})
-	const [showPassword, setShowPassword] = useState(false)
 
 	const {
 		handleSubmit,
