@@ -1,7 +1,7 @@
 import { createContext, useReducer, useEffect } from 'react'
 import apiService from '../app/apiService'
 import { isValidToken } from '../utils/jwt'
-import { LOGIN_SUCCESS, LOGOUT, REGISTER_SUCCESS } from '../constants/auth'
+import { INITIALIZED_GUEST, INITIALIZED_MEMBER, LOGIN_SUCCESS, LOGOUT, REGISTER_SUCCESS } from '../constants/auth'
 
 const initialState = {
 	isInitialized: false,
@@ -11,6 +11,18 @@ const initialState = {
 
 const reducer = (state, action) => {
 	switch (action.type) {
+		case INITIALIZED_GUEST:
+			return {
+				...state,
+				isInitialized: true,
+			}
+		case INITIALIZED_MEMBER:
+			return {
+				...state,
+				isInitialized: true,
+				isAuthenticated: true,
+				user: action.payload
+			}
 		case LOGIN_SUCCESS:
 			return {
 				...state,
@@ -38,8 +50,6 @@ const AuthContext = createContext({...initialState})
 
 const setSession = (accessToken) => {
 	if(accessToken) {
-		console.log('save token');
-		
 		window.localStorage.setItem("accessToken", accessToken)
 		apiService.defaults.headers.common.Authorization = `Bearer ${accessToken}`
 	} else {
@@ -50,6 +60,26 @@ const setSession = (accessToken) => {
 
 function AuthProvider({children}) {
 	const [state, dispatch] = useReducer(reducer, initialState)
+
+	useEffect(()=>{
+		const initialized = async () => {
+			try {
+				const accessToken = window.localStorage.getItem("accessToken")
+				const decoded = accessToken && isValidToken(accessToken)
+				if (!decoded) throw new Error("No valid token")
+
+				setSession(accessToken) // set header trước khi gọi API
+				const response = await apiService.get(`/users/${decoded.sub}`)
+
+				dispatch({ type: INITIALIZED_MEMBER, payload: response.data })
+			} catch (error) {
+				console.log(`INITIALIZED_GUEST: ${error}`);
+				setSession()
+				dispatch({ type: INITIALIZED_GUEST })
+			}
+		}
+		initialized()
+	},[])
 
 	const login = async ({email, password}, callback) => {
 		const response = await apiService.post("/login", {

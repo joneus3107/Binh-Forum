@@ -1,9 +1,14 @@
+import LoadingScreen from '../components/LoadingScreen'
 import useAuth from '../hooks/useAuth'
 import { Navigate, useLocation } from 'react-router'
 
 function AuthRequired({ children }) {
-	const { isAuthenticated } = useAuth() 
+	const { isInitialized, isAuthenticated } = useAuth() 
 	const location = useLocation()
+
+	if(!isInitialized) {
+		return <LoadingScreen/>
+	}
 
 	if(!isAuthenticated) {
 		return <Navigate to="/login" state={{ from: location}} replace />
