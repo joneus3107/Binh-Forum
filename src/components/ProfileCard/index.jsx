@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, Tabs, Tab, Box, styled, Stack, Avatar, Typography } from '@mui/material'
+import { Card, Tabs, Tab, Box, styled, Stack, Avatar, Typography, useMediaQuery, useTheme } from '@mui/material'
 import PCoverImage from './PCoverImage'
 
 const ProfileCover = styled(Box)(({theme}) => ({
@@ -24,6 +24,8 @@ const DisplayFriend = styled(Typography)(({theme}) => ({
 
 function ProfileCard({user, tabList, currentTab, onChange}) {
 	const { coverUrl, name, avatarUrl, email } = user
+	const theme = useTheme()
+	const showTabLabel = useMediaQuery(theme.breakpoints.up('sm'))
 
 	return (
 		<Card>
@@ -72,7 +74,7 @@ function ProfileCard({user, tabList, currentTab, onChange}) {
 							key={tab.value}
 							value={tab.value}
 							icon={tab.icon}
-							label={tab.name}
+							label={showTabLabel? tab.name : null}
 						/>
 					))}
 				</Tabs>
