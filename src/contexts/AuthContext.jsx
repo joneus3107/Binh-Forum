@@ -110,8 +110,15 @@ function AuthProvider({children}) {
 		callback()
 	}
 
+	const logout = () => {
+		setSession()
+		dispatch({
+			type: LOGOUT
+		})
+	}
+
 	return (
-		<AuthContext.Provider value={{...state, login, register}}>
+		<AuthContext.Provider value={{...state, login, register, logout}}>
 			{children}
 		</AuthContext.Provider>
 	)

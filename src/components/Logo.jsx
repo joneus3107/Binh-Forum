@@ -5,10 +5,17 @@ import { Box } from '@mui/material'
 function Logo({disabled = false, sx}) {
 	const logoImage = (
 		<Box sx={{
+			display: 'flex',
+			justifyContent: 'center',
+			alignItems: 'center',
 			width: '40px',
 			...sx
 		}}>
-			<img src={LogoImage} alt="Ryuki Forum" />
+			<Box component="img" src={LogoImage} alt="Ryuki Forum" sx={{
+				objectFit: 'contain',
+				maxWidth: '100%',
+				maxHeight: '100%'
+			}}/>
 		</Box>
 	)
 
