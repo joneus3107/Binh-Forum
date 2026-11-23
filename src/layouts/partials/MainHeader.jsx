@@ -25,7 +25,7 @@ function MainHeader() {
 	};
 
 	return (
-		<AppBar component="header" position="sticky" color="transparent" sx={{mb: 3}}>
+		<AppBar component="header" position="sticky" color="transparent" sx={{mb: 3, backgroundColor: "common.white"}}>
 			<Toolbar>
 				<Logo
 					sx={{
