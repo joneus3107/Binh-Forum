@@ -5,24 +5,26 @@ import { uploadImage } from "../../utils/cloundinary"
 const initialState = {
 	isLoading: false,
 	error: null,
-	posts: [],
-	start: 1,
+	postsById: {},
+	currentPagePosts: [],
+	page: 1,
 	total: 0,
 }
 
 export const createPost = createAsyncThunk("post/createPost", 
 	async({user, content, image, createdAt}, { rejectWithValue }) => {
 		try {
+			const { id, name, avatarUrl } = user
 			const imageUrl = image ? await uploadImage(image) : null
 
 			const response = await apiService.post("/posts", {
-				userId: user.id,
+				userId: id,
 				content,
 				image: imageUrl,
 				createdAt
 			})
 
-			return {...response.data, user}
+			return {...response.data, user: { name, avatarUrl }}
 		} catch (error) {
 			const data = error.response?.data
 			const message =
@@ -36,13 +38,13 @@ export const createPost = createAsyncThunk("post/createPost",
 )
 
 export const getPostList = createAsyncThunk("post/getPostList",
-	async ({ id, start, limit = 2, profileOnly = true }, { rejectWithValue }) => {
+	async ({ id, page, limit = 2, profileOnly = true }, { rejectWithValue }) => {
 		try {
 			if(!profileOnly) throw new Error('Chức năng đang xây dựng')
 
 			const params = {
 				userId: id,
-				_start: start,
+				_page: page,
 				_limit: limit,
 				_sort: "createdAt",
 				_order: "desc",
@@ -54,7 +56,7 @@ export const getPostList = createAsyncThunk("post/getPostList",
 			return {
 				posts: response.data,
 				total: Number(response.headers["x-total-count"]),
-				start,
+				page,
 			}
 		} catch (error) {
 			const data = error.response?.data
@@ -70,8 +72,9 @@ const postSlice = createSlice({
 	reducers: {
 		resetPostsList(state) {
 			state.error = null
-			state.posts= []
-			state.start= 0
+			state.postsById = {}
+			state.currentPagePosts= []
+			state.page= 1
 			state.total= 0
 		}
 	},
@@ -85,9 +88,10 @@ const postSlice = createSlice({
 			.addCase(createPost.fulfilled, (state, action) => {
 				state.isLoading = false
 				state.error = null
-				state.posts = [action.payload, ...state.posts]
+				state.postsById[action.payload.id] = action.payload
+				state.currentPagePosts.unshift(action.payload.id)
+				state.currentPagePosts.pop()
 				state.total += 1
-				state.start += 1
 			})
 			.addCase(createPost.rejected, (state, action) => {
 				state.isLoading = false
@@ -99,18 +103,18 @@ const postSlice = createSlice({
 				state.error = null
 			})
 			.addCase(getPostList.fulfilled, (state, action) => {
-				const { posts, total, start } = action.payload
+				const { posts, total, page } = action.payload
 				state.isLoading = false
 				state.error = null
 				state.total = total
-				state.start = start
+				state.page = page
 
-				if (start === 0) {
-					state.posts = posts
-				} else {
-					const ids = new Set(state.posts.map((p) => p.id))
-					state.posts.push(...posts.filter((p) => !ids.has(p.id)))
-				}
+				posts.forEach(post => {
+					state.postsById[post.id] = post
+					if(!state.currentPagePosts.includes(post.id)) {
+						state.currentPagePosts.push(post.id)
+					}
+				})
 			})
 			.addCase(getPostList.rejected, (state, action) => {
 				state.isLoading = false

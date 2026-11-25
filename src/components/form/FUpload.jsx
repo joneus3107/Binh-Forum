@@ -15,7 +15,7 @@ const VisuallyHiddenInput = styled('input')({
 	width: 1,
 });
 
-function FUpload({ name, label = "Chọn ảnh", accept = "image/jpeg,image/png,image/webp", ...other }) {
+function FUpload({ name, label = "Chọn ảnh", accept = "image/jpeg,image/png,image/webp", loading = false, ...other }) {
 	const { control } = useFormContext()
 
 	return (

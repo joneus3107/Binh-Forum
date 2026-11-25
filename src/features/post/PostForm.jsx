@@ -82,7 +82,7 @@ function PostForm() {
 							}}
 						/>
 						<Stack direction="row" sx={{justifyContent: "flex-end"}} spacing={2}>
-							<FUpload name="image" />
+							<FUpload name="image" loading={isSubmitting || isLoading} />
 							<Button
 								type='submit'
 								loading={isSubmitting || isLoading}

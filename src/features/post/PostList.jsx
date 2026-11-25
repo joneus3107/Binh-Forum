@@ -1,31 +1,32 @@
-import { Stack, Typography, Box } from '@mui/material'
+import { Stack, Typography, Box, Button } from '@mui/material'
 import PostCard from './PostCard'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { getPostList, resetPostsList } from "./postSlice"
+import { UI_MORE } from '../../constants/ui'
 
 function PostList({ userId }) {
-	const [page, setPage] = useState(1)
 	const dispatch = useDispatch()
-	const { posts } = useSelector(state => state.post)
+	const { postsById, currentPagePosts, isLoading, page, total } = useSelector(state => state.post)
+	const posts = currentPagePosts.map(id => postsById[id])
+	const hasMorePost = currentPagePosts.length < total
 
 	useEffect(() => {
-		const getPostsData = () => {
-			if(!userId) return
-			const dispatchData = {
-				id: userId,
-				page,
-			}
-			
-			dispatch(getPostList(dispatchData))
-		}
+		if(!userId) return
 
-		getPostsData()
+		dispatch(getPostList({ id: userId, page: 1 }))
 
 		return () => {
 			dispatch(resetPostsList())
 		}
-	},[page, userId, dispatch])
+	},[userId, dispatch])
+
+	const loadMoreHandler = () => {
+		dispatch(getPostList({
+				id: userId,
+				page: page + 1,
+			}))
+	}
 
 	if(!posts.length) return (
 		<Box>
@@ -34,8 +35,19 @@ function PostList({ userId }) {
 	)
 	
 	return (
-		<Stack spacing={2}>
-			{posts.map(post => <PostCard key={post.id} data={post} />)}
+		<Stack spacing={3}>
+			<Stack spacing={2}>
+				{posts.map(post => <PostCard key={post.id} data={post} />)}
+			</Stack>
+
+			{ hasMorePost && (
+				<Box sx={{
+					display: "flex",
+					justifyContent: "center"
+				}}>
+					<Button variant='outlined' onClick={() => loadMoreHandler()} loading={isLoading}>{UI_MORE}</Button>
+				</Box>
+			) }
 		</Stack>
 	)
 }
