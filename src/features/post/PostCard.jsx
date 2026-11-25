@@ -5,12 +5,14 @@ import ShareIcon from '@mui/icons-material/Share';
 import CommentIcon from '@mui/icons-material/Comment';
 import { red } from '@mui/material/colors';
 import { useState } from 'react';
+import useIsOwner from '../../hooks/useIsOwner';
+import { fPostDate } from '../../utils/formatTime';
 
 function PostCard({ data }) {
 	const [open, setOpen] = useState(false)
-	const formatDate = date => new Date(date).toLocaleString("vi-VN")
 	const { content: postContent, createdAt: postCreatedAt, image: postImage, user: author, id: postId } = data
-
+	const isOwner = useIsOwner(author.id)
+	
 	return (
 		<Card>
 			<CardHeader
@@ -18,12 +20,14 @@ function PostCard({ data }) {
 					<Avatar sx={{ bgcolor: red[500] }} aria-label="recipe" alt={author.name} src={author.avatarUrl} />
 				}
 				action={
+					isOwner?
 					<IconButton aria-label="settings">
 						<MoreVertIcon />
 					</IconButton>
+					: null
 				}
 				title={author.name}
-				subheader={formatDate(postCreatedAt)}
+				subheader={fPostDate(postCreatedAt)}
 			/>
 			<CardContent>
 				<Typography>{ postContent }</Typography>

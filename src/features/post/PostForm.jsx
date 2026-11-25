@@ -49,7 +49,7 @@ function PostForm() {
 	const onSubmit = async (data) => {
 		const dispatchData = {
 			...data,
-			userId: user.id,
+			user: user,
 			createdAt: new Date().toISOString()
 		}
 

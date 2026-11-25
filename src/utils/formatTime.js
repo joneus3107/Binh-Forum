@@ -1,23 +1,42 @@
 import {format, getTime, formatDistanceToNow} from "date-fns"
+import { vi } from "date-fns/locale"
+
+const MINUTE = 60 * 1000
+const HOUR = 60 * MINUTE
 
 export function fDate(date) {
-	return format(new Date(date), "dd MMMM yyyy")
+	return format(new Date(date), "dd MMMM yyyy", { locale: vi })
 }
 
 export function fDateTime(date) {
-	return format(new Date(date), "dd MMMM yyyy HH:mm")
+	return format(new Date(date), "dd MMMM yyyy HH:mm", { locale: vi })
 }
 
 export function fTimestamp(date) {
-	return getTime(new Date(date))
+	return getTime(new Date(date), { locale: vi })
 }
 
 export function fDateTimeSuffix(date) {
-	return format(new Date(date), "dd/MM/yyyy hh:mm p")
+	return format(new Date(date), "dd/MM/yyyy hh:mm p", { locale: vi })
 }
 
 export function fToNow(date) {
 	return formatDistanceToNow(new Date(date), {
-		addSuffix: true
+		addSuffix: true,
+		locale: vi 
 	})
+}
+
+export function fPostDate(date) {
+	if (!date) return ""
+
+	const time = new Date(date).getTime()
+	if (Number.isNaN(time)) return ""
+
+	const diff = Date.now() - time
+
+	if (diff < 5 * MINUTE) return "Vừa xong"
+	if (diff < HOUR) return fToNow(date)
+
+	return fDateTime(date)
 }

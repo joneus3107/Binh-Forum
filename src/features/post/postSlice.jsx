@@ -6,23 +6,23 @@ const initialState = {
 	isLoading: false,
 	error: null,
 	posts: [],
-	page: 1,
+	start: 1,
 	total: 0,
 }
 
 export const createPost = createAsyncThunk("post/createPost", 
-	async({userId, content, image, createdAt}, { rejectWithValue }) => {
+	async({user, content, image, createdAt}, { rejectWithValue }) => {
 		try {
 			const imageUrl = image ? await uploadImage(image) : null
 
 			const response = await apiService.post("/posts", {
-				userId,
+				userId: user.id,
 				content,
 				image: imageUrl,
 				createdAt
 			})
 
-			return response.data
+			return {...response.data, user}
 		} catch (error) {
 			const data = error.response?.data
 			const message =
@@ -36,13 +36,13 @@ export const createPost = createAsyncThunk("post/createPost",
 )
 
 export const getPostList = createAsyncThunk("post/getPostList",
-	async ({ id, page, limit = 2, profileOnly = true }, { rejectWithValue }) => {
+	async ({ id, start, limit = 2, profileOnly = true }, { rejectWithValue }) => {
 		try {
 			if(!profileOnly) throw new Error('Chức năng đang xây dựng')
 
 			const params = {
 				userId: id,
-				_page: page,
+				_start: start,
 				_limit: limit,
 				_sort: "createdAt",
 				_order: "desc",
@@ -54,7 +54,7 @@ export const getPostList = createAsyncThunk("post/getPostList",
 			return {
 				posts: response.data,
 				total: Number(response.headers["x-total-count"]),
-				page,
+				start,
 			}
 		} catch (error) {
 			const data = error.response?.data
@@ -71,7 +71,7 @@ const postSlice = createSlice({
 		resetPostsList(state) {
 			state.error = null
 			state.posts= []
-			state.page= 0
+			state.start= 0
 			state.total= 0
 		}
 	},
@@ -82,9 +82,12 @@ const postSlice = createSlice({
 				state.isLoading = true
 				state.error = null
 			})
-			.addCase(createPost.fulfilled, state => {
+			.addCase(createPost.fulfilled, (state, action) => {
 				state.isLoading = false
 				state.error = null
+				state.posts = [action.payload, ...state.posts]
+				state.total += 1
+				state.start += 1
 			})
 			.addCase(createPost.rejected, (state, action) => {
 				state.isLoading = false
@@ -96,12 +99,18 @@ const postSlice = createSlice({
 				state.error = null
 			})
 			.addCase(getPostList.fulfilled, (state, action) => {
-				const { posts, total, page } = action.payload
+				const { posts, total, start } = action.payload
 				state.isLoading = false
 				state.error = null
 				state.total = total
-				state.page = page
-				state.posts = page === 1 ? posts : [...state.posts, ...posts]
+				state.start = start
+
+				if (start === 0) {
+					state.posts = posts
+				} else {
+					const ids = new Set(state.posts.map((p) => p.id))
+					state.posts.push(...posts.filter((p) => !ids.has(p.id)))
+				}
 			})
 			.addCase(getPostList.rejected, (state, action) => {
 				state.isLoading = false

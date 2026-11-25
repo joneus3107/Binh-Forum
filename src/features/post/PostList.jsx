@@ -1,15 +1,17 @@
 import { Stack, Typography, Box } from '@mui/material'
 import PostCard from './PostCard'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { getPostList, resetPostsList } from "./postSlice"
 
 function PostList({ userId }) {
+	const [page, setPage] = useState(1)
 	const dispatch = useDispatch()
-	const { posts, page } = useSelector(state => state.post)
+	const { posts } = useSelector(state => state.post)
 
 	useEffect(() => {
 		const getPostsData = () => {
+			if(!userId) return
 			const dispatchData = {
 				id: userId,
 				page,
@@ -23,7 +25,7 @@ function PostList({ userId }) {
 		return () => {
 			dispatch(resetPostsList())
 		}
-	},[userId])
+	},[page, userId, dispatch])
 
 	if(!posts.length) return (
 		<Box>
