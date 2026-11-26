@@ -38,7 +38,7 @@ export const createPost = createAsyncThunk("post/createPost",
 )
 
 export const getPostList = createAsyncThunk("post/getPostList",
-	async ({ id, page, limit = 2, profileOnly = true }, { rejectWithValue }) => {
+	async ({ id, page = 1, limit = 2, profileOnly = true }, { rejectWithValue }) => {
 		try {
 			if(!profileOnly) throw new Error('Chức năng đang xây dựng')
 
